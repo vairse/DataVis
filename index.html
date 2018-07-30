@@ -52,7 +52,7 @@ var margin = {top: 20, right: 20, bottom: 30, left: 40},
  * axis - sets up axis
  */ 
 // setup x 
-var xValue = function(d) { return d.timestamp;}, // data -> value
+var xValue = function(d) { return d.count;}, // data -> value
     xScale = d3.scale.linear().range([0, width]), // value -> display
     xMap = function(d) { return xScale(xValue(d));}, // data -> display
     xAxis = d3.svg.axis().scale(xScale).orient("bottom");
@@ -75,11 +75,11 @@ var tooltip = d3.select("body").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 // load data
-d3.csv("wfmarketSplitCleaned.csv", function(error, data) {
+d3.csv("wfitems.csv", function(error, data) {
   // change string (from CSV) into number format
   data.forEach(function(d) {
     d.price = +d.price;
-    d.timestamp = d.timestamp.substring(0, 10);
+    d.count = +d.count;
   });
   // don't want dots overlapping axis, so add in buffer to data domain
   xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
@@ -94,7 +94,7 @@ d3.csv("wfmarketSplitCleaned.csv", function(error, data) {
       .attr("x", width)
       .attr("y", -6)
       .style("text-anchor", "end")
-      .text("Date");
+      .text("Count");
   // y-axis
   svg.append("g")
       .attr("class", "y axis")
@@ -112,7 +112,7 @@ d3.csv("wfmarketSplitCleaned.csv", function(error, data) {
     .enter().append("circle")
       .attr("class", "dot")
       .attr("r", 3.5)
-      .attr("cx", yMap)
+      .attr("cx", xMap)
       .attr("cy", yMap)
       .style("fill", function(d) { return color(cValue(d));}) 
       .on("mouseover", function(d) {
