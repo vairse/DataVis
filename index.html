@@ -48,13 +48,13 @@ var margin = {top: 20, right: 20, bottom: 30, left: 40},
 var xValue = function(d) { return d.Calories;}, // data -> value
     xScale = d3.scaleLinear().range([0, width]), // value -> display
     xMap = function(d) { return xScale(xValue(d));}, // data -> display
-    xAxis = d3.svg.axisBottom().scale(xScale);
+    xAxis = d3.axisBottom().scale(xScale);
 
 // setup y
 var yValue = function(d) { return d["Protein (g)"];}, // data -> value
     yScale = d3.scaleLinear().range([height, 0]), // value -> display
     yMap = function(d) { return yScale(yValue(d));}, // data -> display
-    yAxis = d3.svg.axisLeft().scale(yScale);
+    yAxis = d3.axisLeft().scale(yScale);
 
 // setup fill color
 var cValue = function(d) { return d.Manufacturer;},
