@@ -40,7 +40,9 @@ body {
 </style>
 <body>
 <script src="https://d3js.org/d3.v3.min.js"></script>
+<div>
 <a href="#" class="button">Example</a>
+</div>
 <script>
 var margin = {top: 20, right: 20, bottom: 30, left: 40},
     width = 960 - margin.left - margin.right,
@@ -119,7 +121,7 @@ d3.csv("wfitems.csv", function(error, data) {
           tooltip.transition()
                .duration(200)
                .style("opacity", .9);
-          tooltip.html(d.itemName + "<br/> (" + xValue(d) 
+          tooltip.html(d.itemname + "<br/> (" + xValue(d) 
 	        + ", " + yValue(d) + ")")
                .style("left", (d3.event.pageX + 5) + "px")
                .style("top", (d3.event.pageY - 28) + "px");
