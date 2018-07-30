@@ -1,94 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-	<meta charset="utf-8">
-		<title>D3: A simple packed Bubble Chart</title>
-		<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+<svg width="960" height="960" font-family="sans-serif" font-size="10" text-anchor="middle"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
 
-		<style type="text/css">
-			/* No style rules here yet */		
-		</style>
-</head>
-<body>
-	<script type="text/javascript">
+var svg = d3.select("svg"),
+    width = +svg.attr("width"),
+    height = +svg.attr("height");
 
-        dataset = d3.csv("wfmarketSplitCleaned.csv", function(data) {
-  		data.forEach(function(d) {
-    			d.price = +d.price;
-			d.count = +d.count;
-  		});
-	});
+var format = d3.format(",d");
 
-        var diameter = 600;
-        var color = d3.scaleOrdinal(d3.schemeCategory20);
+var color = d3.scaleOrdinal(d3.schemeCategory20c);
 
-        var bubble = d3.pack(dataset)
-            .size([diameter, diameter])
-            .padding(1.5);
+var pack = d3.pack()
+    .size([width, height])
+    .padding(1.5);
 
-        var svg = d3.select("body")
-            .append("svg")
-            .attr("width", diameter)
-            .attr("height", diameter)
-            .attr("class", "bubble");
+d3.csv("wfmarketSplitCleaned.csv", function(d) {
+  d.price = +d.price;
+  d.count = +d.count;
+  return d;
+}, function(error, classes) {
+  if (error) throw error;
 
-        var nodes = d3.hierarchy(dataset)
-            .sum(function(d) { return d.Count; });
+  var root = d3.hierarchy({children: classes})
+      .sum(function(d) { return d.price; })
+      .each(function(d) {
+        if (id = d.data.id) {
+          var id, i = id.lastIndexOf(".");
+          d.itemName = id;
+          d.package = id.slice(0, i);
+          d.class = id.slice(i + 1);
+        }
+      });
 
-        var node = svg.selectAll(".node")
-            .data(bubble(nodes).descendants())
-            .enter()
-            .filter(function(d){
-                return  !d.children
-            })
-            .append("g")
-            .attr("class", "node")
-            .attr("transform", function(d) {
-                return "translate(" + d.x + "," + d.y + ")";
-            });
+  var node = svg.selectAll(".node")
+    .data(pack(root).leaves())
+    .enter().append("g")
+      .attr("class", "node")
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 
-        node.append("title")
-            .text(function(d) {
-                return d.Name + ": " + d.Count;
-            });
+  node.append("circle")
+      .attr("id", function(d) { return d.id; })
+      .attr("r", function(d) { return d.r; })
+      .style("fill", function(d) { return color(d.package); });
 
-        node.append("circle")
-            .attr("r", function(d) {
-                return d.r;
-            })
-            .style("fill", function(d,i) {
-                return color(i);
-            });
+  node.append("clipPath")
+      .attr("id", function(d) { return "clip-" + d.id; })
+    .append("use")
+      .attr("xlink:href", function(d) { return "#" + d.id; });
 
-        node.append("text")
-            .attr("dy", ".2em")
-            .style("text-anchor", "middle")
-            .text(function(d) {
-                return d.data.Name.substring(0, d.r / 3);
-            })
-            .attr("font-family", "sans-serif")
-            .attr("font-size", function(d){
-                return d.r/5;
-            })
-            .attr("fill", "white");
+  node.append("text")
+      .attr("clip-path", function(d) { return "url(#clip-" + d.id + ")"; })
+    .selectAll("tspan")
+    .data(function(d) { return d.class.split(/(?=[A-Z][^A-Z])/g); })
+    .enter().append("tspan")
+      .attr("x", 0)
+      .attr("y", function(d, i, nodes) { return 13 + (i - nodes.length / 2 - 0.5) * 10; })
+      .text(function(d) { return d; });
 
-        node.append("text")
-            .attr("dy", "1.3em")
-            .style("text-anchor", "middle")
-            .text(function(d) {
-                return d.data.Count;
-            })
-            .attr("font-family",  "Gill Sans", "Gill Sans MT")
-            .attr("font-size", function(d){
-                return d.r/5;
-            })
-            .attr("fill", "white");
+  node.append("title")
+      .text(function(d) { return d.id + "\n" + format(d.price); });
+});
 
-        d3.select(self.frameElement)
-            .style("height", diameter + "px");
-
-
-
-	</script>
-</body>
-</html>
+</script>
