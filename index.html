@@ -82,7 +82,9 @@ var title = svg.append("text")
     .attr("class", "title")
     .attr("dy", ".71em")
     .text(2000);
-
+d3.csv("wfMarketSplitCleaned.csv", function(data) {
+  console.log(data[0]);
+});
 d3.csv("population.csv", function(error, data) {
 
   // Convert strings to numbers.
