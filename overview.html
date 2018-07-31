@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+
+<style>
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    stroke-width: 2;
+    shape-rendering: crispEdges;
+}
+</style>
+<body>
+<script src="https://d3js.org/d3.v3.min.js"></script>
+<script>
+// Set the canvas dimensions
+var margin = {top: 30, right: 20, bottom: 70, left: 50},
+    width = 950 - margin.left - margin.right,
+    height = 450 - margin.top - margin.bottom;
+
+// Set the x and y values
+var x = d3.time.scale().range([0, width]);
+var y = d3.scale.linear().range([height, 0]);
+
+//Format d.date variable
+var formatTime = d3.time.format("%Y");
+
+// Define the axes
+var xAxis = d3.svg.axis().scale(x)
+    .orient("bottom").ticks(15);
+
+var yAxis = d3.svg.axis().scale(y)
+    .orient("left").ticks(10);
+
+// Define the line
+var dataline = d3.svg.line()    
+    .x(function(d) { return x(d.date); })
+    .y(function(d) { return y(d.data); });
+
+// Adds the canvas
+var svg = d3.select("body")
+    .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .attr("font", "Arial")
+        .style("font-size","14px")
+    .append("g")
+        .attr("transform", 
+              "translate(" + margin.left + "," + margin.top + ")");
+
+// Add a title
+var title = svg.append("text")
+    .attr("x", (width / 2))             
+    .attr("y", 0 - (margin.top / 2))
+    .attr("text-anchor", "middle")  
+    .style("font-size", "16px") 
+    .style("text-decoration", "underline")  
+    .text("Climate Change");
+
+// Add the div for the tooltip
+var div = d3.select("body").append("div")   
+    .attr("class", "tooltip")               
+    .style("opacity", 0);
+
+// Get the data
+data = d3.csv.parse(wfsales.csv);
+data.forEach(function(d) {
+    d.date = new Date(+d.date,0,1);
+    d.data = +d.data;
+});
+
+// Nest the entries by symbol
+var dNest = d3.nest()
+  .key(function(d) {return d.symbol;})
+  .entries(data);
+
+// set the colour scale
+var color = d3.scale.category10();
+
+// Scale the range of the data
+x.domain(d3.extent(data, function(d) { return d.date; }));
+y.domain([0, d3.max(data, function(d) { return d.data; })]);
+
+// spacing for the legend
+legendSpace = width/dNest.length;
+
+// Add the X Axis
+svg.append("g")
+  .attr("class", "x axis")
+  .attr("transform", "translate(0," + height + ")")
+  .call(xAxis);
+
+// Add the Y Axis
+svg.append("g")
+  .attr("class", "y axis")
+  .call(yAxis);
+
+// Loop through each symbol / key
+dNest.forEach(function(d,i) {
+    var lines = svg.append("path")
+        .attr("class", "line")
+        .style("stroke", function() { // Add the colours dynamically
+            return d.color = color(d.key); })
+        .attr("class", 'tag'+d.key.replace(/\s+/g, '')) // assign ID
+        .attr("stroke-width", 2)
+        .attr("fill","none")
+        .attr("d", dataline(d.values));
+
+    // Add the dots for the tooltip
+    svg.selectAll("dot")
+        .data(data)
+    .enter().append("circle")  
+        .attr("r", 2)           
+        .attr("cx", function(d) { return x(d.date); })       
+        .attr("cy", function(d) { return y(d.data); })
+        .style("fill", function(d) {return color(d.symbol)})
+        .attr("class", d=>'tag'+d.symbol.replace(/\s+/g, '')) // assign ID
+        .on("mouseover", function(d) {      
+            div.transition()        
+                .duration(200)      
+                .style("opacity", .9);      
+            div .html("Year: " + formatTime(d.date) + "<br/>"  + d.data)  
+                .style("left", (d3.event.pageX) + "px")     
+                .style("top", (d3.event.pageY - 28) + "px");    
+            })                  
+        .on("mouseout", function(d) {       
+            div.transition()        
+                .duration(500)      
+                .style("opacity", 0); 
+        });
+
+    // Add the Legend
+    svg.append("text")
+        .attr("x", (legendSpace/2)+i*legendSpace)  // space legend
+        .attr("y", height + (margin.bottom/2)+ 5)
+        .attr("class", "legend")    // style the legend
+        .style("font-size","15px")  // Change the font size
+        .style("font-weight", "bold") // Change the font to bold
+        .style("text-anchor", "middle") // center the legend
+        .style("fill", function() { // Add the colours dynamically
+            return d.color = color(d.key); })
+        .on("click", function(){
+            // Determine if current line is visible 
+            var active   = d.active ? false : true,
+            newOpacity = active ? 0 : 1; 
+            // Hide or show the elements based on the ID
+            d3.selectAll(".tag"+d.key.replace(/\s+/g, ''))
+                .transition().duration(100) 
+                .style("opacity", newOpacity); 
+            // Update whether or not the elements are active
+            d.active = active;
+            })  
+        .text(d.key); 
+
+});
+</script>
+
+</body>
