@@ -64,7 +64,7 @@ var div = d3.select("body").append("div")
     .style("opacity", 0);
 
 // Get the data
-data = d3.csv.parse(wfsales.csv);
+data = d3.csv.parse("wfsales.csv");
 data.forEach(function(d) {
     d.sales = +d.sales;
 });
