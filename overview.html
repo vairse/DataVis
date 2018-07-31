@@ -64,10 +64,11 @@ var div = d3.select("body").append("div")
     .style("opacity", 0);
 
 // Get the data
-data = d3.csv("wfsales.csv");
-data.forEach(function(d) {
+d3.csv("wfsales.csv", function(error, data) {
+  // change string (from CSV) into number format
+  data.forEach(function(d) {
     d.sales = +d.sales;
-});
+  });
 
 // Nest the entries by symbol
 var dNest = d3.nest()
