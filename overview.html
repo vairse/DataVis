@@ -68,6 +68,7 @@ d3.csv("wfsales.csv", function(error, data) {
   // change string (from CSV) into number format
   data.forEach(function(d) {
     d.sales = +d.sales;
+      d.date = new Date(2016,+d.date.split('-')[0],+d.date.split('-')[1])
   });
 
 // Nest the entries by symbol
