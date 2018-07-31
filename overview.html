@@ -36,7 +36,7 @@ var yAxis = d3.svg.axis().scale(y)
 // Define the line
 var dataline = d3.svg.line()    
     .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.data); });
+    .y(function(d) { return y(d.sales); });
 
 // Adds the canvas
 var svg = d3.select("body")
@@ -66,13 +66,12 @@ var div = d3.select("body").append("div")
 // Get the data
 data = d3.csv.parse(wfsales.csv);
 data.forEach(function(d) {
-    d.date = new Date(+d.date,0,1);
-    d.data = +d.data;
+    d.sales = +d.sales;
 });
 
 // Nest the entries by symbol
 var dNest = d3.nest()
-  .key(function(d) {return d.symbol;})
+  .key(function(d) {return d.type;})
   .entries(data);
 
 // set the colour scale
@@ -80,7 +79,7 @@ var color = d3.scale.category10();
 
 // Scale the range of the data
 x.domain(d3.extent(data, function(d) { return d.date; }));
-y.domain([0, d3.max(data, function(d) { return d.data; })]);
+y.domain([0, d3.max(data, function(d) { return d.sales; })]);
 
 // spacing for the legend
 legendSpace = width/dNest.length;
@@ -113,14 +112,14 @@ dNest.forEach(function(d,i) {
     .enter().append("circle")  
         .attr("r", 2)           
         .attr("cx", function(d) { return x(d.date); })       
-        .attr("cy", function(d) { return y(d.data); })
-        .style("fill", function(d) {return color(d.symbol)})
-        .attr("class", d=>'tag'+d.symbol.replace(/\s+/g, '')) // assign ID
+        .attr("cy", function(d) { return y(d.sales); })
+        .style("fill", function(d) {return color(d.type)})
+        .attr("class", d=>'tag'+d.type.replace(/\s+/g, '')) // assign ID
         .on("mouseover", function(d) {      
             div.transition()        
                 .duration(200)      
                 .style("opacity", .9);      
-            div .html("Year: " + formatTime(d.date) + "<br/>"  + d.data)  
+            div .html("Year: " + formatTime(d.date) + "<br/>"  + d.sales)  
                 .style("left", (d3.event.pageX) + "px")     
                 .style("top", (d3.event.pageY - 28) + "px");    
             })                  
