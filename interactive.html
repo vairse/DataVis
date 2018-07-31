@@ -148,8 +148,6 @@ d3.csv("wfitems.csv", function(data) {
       //.attr("r", function (d) { return 6 * Math.sqrt(d[rCat] / Math.PI); })
       .attr("transform", transform)
       .style("fill", function(d) { return color(d[colorCat]); })
-      .on("mouseover", tip.show)
-      .on("mouseout", tip.hide);
 
   var legend = svg.selectAll(".legend")
       .data(color.domain())
