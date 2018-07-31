@@ -25,7 +25,12 @@
 .dot {
   fill-opacity: .5;
 }
-
+.tooltip {
+  position: absolute;
+  width: 200px;
+  height: 28px;
+  pointer-events: none;
+}
 	</style>
   </head>
   <body>
@@ -49,9 +54,12 @@ var y = d3.scale.linear()
 
 var xCat = "count",
     yCat = "price",
-    rCat = "Protein (g)",
     colorCat = "type";
-
+	    
+var tooltip = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+	    
 d3.csv("wfitems.csv", function(data) {
   data.forEach(function(d) {
     d.price = +d.price;
@@ -145,9 +153,23 @@ d3.csv("wfitems.csv", function(data) {
       .data(data)
     .enter().append("circle")
       .classed("dot", true)
-      .attr("r",1)
+      .attr("r",5)
       .attr("transform", transform)
       .style("fill", function(d) { return color(d[colorCat]); })
+      .on("mouseover", function(d) {
+          tooltip.transition()
+               .duration(200)
+               .style("opacity", .9);
+          tooltip.html(d.itemname + "<br/> (" + xValue(d) 
+	        + ", " + yValue(d) + ")")
+               .style("left", (d3.event.pageX + 5) + "px")
+               .style("top", (d3.event.pageY - 28) + "px");
+      })
+      .on("mouseout", function(d) {
+          tooltip.transition()
+               .duration(500)
+               .style("opacity", 0);
+      });
 
   var legend = svg.selectAll(".legend")
       .data(color.domain())
